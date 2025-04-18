@@ -12,6 +12,27 @@ namespace J1939Library
         public SendCanFunc SendCan { get; set; }
         public uint Channel { get; set; }
         private Link link = new Link();
+        public const int TX_WAIT = 0;
+        public const int TX_CM_START = 1;
+        public const int TX_CM_WAIT = 2;
+        public const int TX_DT = 3;
+        public const int WAIT_ACK = 4;
+        public const int TX_ERROR = 5;
+        public const int TX_DONE = 6;
+
+        public const int RX_WAIT = 0;
+        public const int RX_READ_DATA = 1;
+        public const int RX_DATA_WAIT = 2;
+        public const int RX_ERROR = 3;
+        public const int RX_DONE = 4;
+
+        private int state;
+
+        public int State
+        {
+            get { return state; }
+        }
+
 
         public void ReadDataTransfer(byte SA, byte[] data)
         {
@@ -270,6 +291,37 @@ namespace J1939Library
                     SendAcknowledgement(SA, (byte)ControlByteCodes.ACKNOWLEDGEMENT_PGN_SUPPORTED,
                         (byte)GroupFunctionValueCodes.NORMAL, PGN);
                     break;
+            }
+        }
+        public J1939Error Send(uint PGN,byte DA, byte[] data)
+        {
+            ushort byteSize = 0;
+            link.SendTP_CM.ControlByte = (byte)ControlByteCodes.TP_CM_RTS;
+            SendConnectionManagement(DA);
+        }
+        private void ChangeState(byte state)
+        {
+            if (this.state != state)
+            {
+                //Log.Info("Client state changed from {0} to {1}", this.state, state);
+                this.state = state;
+                switch (state)
+                {
+                    case STATE_IDLE:
+                        //client->fn(client, UDS_EVT_Idle, NULL);
+                        break;
+                    case STATE_SENDING:
+                        break;
+                    case STATE_AWAIT_SEND_COMPLETE:
+                        break;
+                    case STATE_AWAIT_RESPONSE:
+                        break;
+                    case STATE_PROCESS_RESPONSE:
+                        break;
+                    default:
+                        //UDS_ASSERT(0);
+                        break;
+                }
             }
         }
     }
