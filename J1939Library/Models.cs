@@ -262,4 +262,8 @@ namespace J1939Library
         ABORT_TIME_OUT = 0x3,
         NO_CAUSE = 0xFF
     }
+    public enum J1939Error
+    {
+        OK,
+    }
 }
