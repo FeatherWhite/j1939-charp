@@ -4,12 +4,29 @@ using System.Text;
 
 namespace J1939Library
 {
-    public enum J1939StatusCode : ushort
+    public enum J1939TpSendStatus : ushort
     {
-        SendOK = 0x00,
-        SendError = 0x01,
-        SendBusy = 0x02,
-        SendTimeout = 0x03
+        OK = 0x00,
+        Error = 0x01,
+        InProgress = 0x02,
+        Timeout = 0x03,
+        NotSupported = 0x04
+    }
+    public enum J1939TpReceiveStatus : ushort
+    {
+        OK = 0x00,
+        Error = 0x01,
+        Busy = 0x02,
+        Timeout = 0x03,
+        NotSupported = 0x04
+    }
+    public enum J1939TpReturnCode : ushort
+    {
+        OK = 0x00,
+        Error = 0x01,
+        Busy = 0x02,
+        Timeout = 0x03,
+        NotSupported = 0x04
     }
     public enum PGNCode : uint
     {

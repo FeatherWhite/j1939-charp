@@ -26,6 +26,25 @@ namespace J1939Library
         public const int RX_ERROR = 3;
         public const int RX_DONE = 4;
 
+        public const int J1939_TP_RX_WAIT = 0;
+        public const int J1939_TP_RX_READ_DATA = 1;
+        public const int J1939_TP_RX_DATA_WAIT = 2;
+        public const int J1939_TP_RX_ERROR = 3;
+        public const int J1939_RX_DONE = 4;
+
+        public const int J1939_TP_NULL = 0; /**< 长数据传输处于空闲，只有TP系统处于空闲，才能用处理下一个发送，和接受请求*/
+        public const int J1939_TP_RX = 1;   /**< 长数据传输处于接收*/
+        public const int J1939_TP_TX = 2;   /**< 长数据传输处于发送*/
+        public const int J1939_TP_OSBUSY = 3;/**< 长数据传输处于繁忙，比如刚接受一整段长数据，但是CPU没来得处理，又一个长数据请求到来，为了数据不被覆盖，将状态设为本值*/
+
+        public const int J1939_TP_TX_WAIT = 0;
+        public const int J1939_TP_TX_CM_START = 1;
+        public const int J1939_TP_TX_CM_WAIT = 2;
+        public const int J1939_TP_TX_DT = 3;
+        public const int J1939_TP_WAIT_ACK = 4;
+        public const int J1939_TP_TX_ERROR = 5;
+        public const int J1939_TX_DONE = 6;
+
         private int state;
 
         public int State
@@ -127,7 +146,7 @@ namespace J1939Library
             }
         }
 
-        public J1939StatusCode SendConnectionManagement(byte DA)
+        public J1939TpSendStatus SendConnectionManagement(byte DA)
         {
             uint ID = Convert.ToUInt32((0x1CEC << 16) | (DA << 8) | link.SendInfo.Address);
             byte[] data = new byte[8];
@@ -163,20 +182,20 @@ namespace J1939Library
             data[6] = (byte)(link.SendTP_CM.PGNOfThePacketedMessage >> 8);
             data[7] = (byte)(link.SendTP_CM.PGNOfThePacketedMessage >> 16);
             bool isSuccess = SendCan(ID, Channel, data);
-            J1939StatusCode status = J1939StatusCode.SendOK;
+            J1939TpSendStatus status = J1939TpSendStatus.SendOK;
             if (!isSuccess)
             {
-                status = J1939StatusCode.SendError;
+                status = J1939TpSendStatus.SendError;
             }
             return status;
         }
 
-        public J1939StatusCode SendDataTransfer(byte DA)
+        public J1939TpSendStatus SendDataTransfer(byte DA)
         {
             uint ID = Convert.ToUInt32((0x1CEB << 16) | (DA << 8) | link.SendInfo.Address);
             byte[] package = new byte[8];
             ushort bytesSent = 0;
-            J1939StatusCode status = J1939StatusCode.SendOK;
+            J1939TpSendStatus status = J1939TpSendStatus.SendOK;
             switch ((ControlByteCodes)link.ReceiveTP_CM.ControlByte)
             {
                 case ControlByteCodes.TP_CM_BAM:
@@ -200,7 +219,7 @@ namespace J1939Library
                         Thread.Sleep(100);
                         if (!isSuccess)
                         {
-                            status = J1939StatusCode.SendError;
+                            status = J1939TpSendStatus.SendError;
                             break;
                         }
                         break;
@@ -224,7 +243,7 @@ namespace J1939Library
                         bool isSuccess = SendCan(ID, Channel, package);
                         if (!isSuccess)
                         {
-                            status = J1939StatusCode.SendError;
+                            status = J1939TpSendStatus.SendError;
                             break;
                         }
                         break;
@@ -232,7 +251,7 @@ namespace J1939Library
             }
             return status;
         }
-        public J1939StatusCode SendAcknowledgement
+        public J1939TpSendStatus SendAcknowledgement
             (byte DA, byte controlByte, byte groupFunctionValue, uint PGNOfRequestedInfo)
         {
             uint ID = Convert.ToUInt32((0x18E8 << 16) | (DA << 8) | link.SendInfo.Address);
@@ -246,15 +265,15 @@ namespace J1939Library
             data[6] = (byte)(PGNOfRequestedInfo >> 8);
             data[7] = (byte)(PGNOfRequestedInfo >> 16);
             bool isSuccess = SendCan(ID, Channel, data);
-            J1939StatusCode status = J1939StatusCode.SendOK;
+            J1939TpSendStatus status = J1939TpSendStatus.SendOK;
             if (!isSuccess)
             {
-                status = J1939StatusCode.SendError;
+                status = J1939TpSendStatus.SendError;
             }
             return status;
         }
 
-        public J1939StatusCode SendRequest(byte DA,uint PGNCode)
+        public J1939TpSendStatus SendRequest(byte DA,uint PGNCode)
         {
             byte[] PGN = new byte[3];
             PGN[0] = (byte)PGNCode;
@@ -262,10 +281,10 @@ namespace J1939Library
             PGN[2] = (byte)(PGNCode >> 16);
             uint ID = Convert.ToUInt32((0x18EA << 16) | (DA << 8) | link.SendInfo.Address);
             bool isSuccess = SendCan(ID, Channel, PGN);
-            J1939StatusCode status = J1939StatusCode.SendOK;
+            J1939TpSendStatus status = J1939TpSendStatus.SendOK;
             if (!isSuccess)
             {
-                status = J1939StatusCode.SendError;
+                status = J1939TpSendStatus.SendError;
             }
             return status;
         }
