@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MsdEdit
 {
-    class j1939msg
+    class J1939msg
     {
         public byte prio = 0;
         public uint pgn = 0;
@@ -13,7 +13,7 @@ namespace MsdEdit
         public uint dlc = 0;
         public byte[] data;
 
-        public j1939msg()
+        public J1939msg()
         {
             data = new byte[256];
         }
