@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "J1939Library", "J1939Library\J1939Library.csproj", "{504B745E-210E-4318-B361-D5BA1A4683B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Triumph.J1939", "J1939Library\Triumph.J1939.csproj", "{504B745E-210E-4318-B361-D5BA1A4683B5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZLG.CAN", "..\ZLG.CAN\ZLG.CAN\ZLG.CAN.csproj", "{DC91BAF0-711F-4229-87D8-9D98B3A98398}"
 EndProject

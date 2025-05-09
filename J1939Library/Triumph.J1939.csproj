@@ -5,4 +5,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="J1939早期.zip" />
+  </ItemGroup>
+
 </Project>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MsdEdit
+namespace Triumph.J1939
 {
     class J1939msg
     {
@@ -15,7 +15,7 @@ namespace MsdEdit
 
         public J1939msg()
         {
-            data = new byte[256];
+            data = new byte[1785];
         }
     }
 

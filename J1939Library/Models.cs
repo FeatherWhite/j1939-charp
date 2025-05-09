@@ -269,6 +269,8 @@ namespace J1939Library
         public TP_CM ReceiveTP_CM { get; set; } = new TP_CM();
         public TP_DT SendTP_DT { get; set; } = new TP_DT();
         public TP_CM SendTP_CM { get; set; } = new TP_CM();
+        public J1939TpSendStatus SendStatus { get; set; } = new J1939TpSendStatus();
+        public J1939TpReceiveStatus ReceiveStatus { get; set; } = new J1939TpReceiveStatus();
     }
     /* Enums for the acknowledgements */
     public enum GroupFunctionValueCodes : byte
