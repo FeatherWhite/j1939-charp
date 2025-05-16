@@ -13,11 +13,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
-using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using System.Xml;
-using Peak.Can.Light;
+//using Peak.Can.Light;
 using System.Reflection;
 
 

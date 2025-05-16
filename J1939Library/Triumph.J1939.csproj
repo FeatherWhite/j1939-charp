@@ -1,12 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+	  <TargetFrameworks>netstandard2.1;net48</TargetFrameworks>
     <Nullable>enable</Nullable>
+    <PlatformTarget>x86</PlatformTarget>
+	  <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CanMain.cs" />
+    <Compile Remove="CanSend.cs" />
+    <Compile Remove="Gateway.cs" />
+    <Compile Remove="J1939Model.cs" />
+    <Compile Remove="J1939msg.cs" />
+    <Compile Remove="J1939TP.cs" />
+    <Compile Remove="Models.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="J1939早期.zip" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ZLG.CAN\ZLG.CAN\ZLG.CAN.csproj" />
   </ItemGroup>
 
 </Project>

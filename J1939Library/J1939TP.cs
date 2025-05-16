@@ -36,7 +36,11 @@ namespace Triumph.J1939
         public SendCanFunc SendCan;
         public uint Channel { get; set; } = 0;
         private byte PC_SA { get; set; } = 0xF9;
-
+        private bool rx_thread_exit = false;
+        private bool tx_thread_exit = false;
+        private bool can_init = false;
+        private int can_init_delay = 0;		// ms before next can init
+        private bool memory_response = false;
         private J1939Model J1939TpTx;
         private List<J1939Model> j1939TpRxList = null;
 
@@ -58,11 +62,7 @@ namespace Triumph.J1939
         // globals
         private string strMffReply = "";
         public List<int> SrcAddrList = null;
-        public int DestAddr = 0x80;
-
-        public J1939TP()
-        {
-        }
+        public int ModuleAddr = 0x80;
 
         public void SendPoll()
         {
@@ -104,7 +104,7 @@ namespace Triumph.J1939
             }
         }
 
-        private void TransmitJ1939(J1939msg msg)
+        public void TransmitJ1939(J1939msg msg)
         {
             if (msg.dlc <= 8)
             {
@@ -308,7 +308,8 @@ namespace Triumph.J1939
                 switch (rxTpMsg.pgn)
                 {
                     case MCAN_PGN_COMPONENT_ID:
-                        gwProcessCompID(rxTpMsg);
+                        //gwProcessCompID(rxTpMsg);
+                        Console.WriteLine("调用gwProcessCompID方法");
                         break;
 
                     default:
@@ -326,6 +327,26 @@ namespace Triumph.J1939
                     }
                 }
             }
+        }
+
+
+        public void MsgToProduct(string strPortName, string strType, string strMsg)
+        {
+            //if ((main_hub != null) && (main_hub.PortQue != null))
+            //{
+            //    AddToCanRcvQue("CAN" + strPortName, strType, strMsg);
+            //}
+        }
+        private byte[] CopyToLength(byte[] srcBytes, int dstLen)
+        {
+            int srcLen = srcBytes.Length;
+            int cnt;
+            byte[] dstBytes = new byte[dstLen];
+            for (cnt = 0; cnt < dstLen; cnt++)
+            {
+                dstBytes[cnt] = srcBytes[cnt];
+            }
+            return (dstBytes);
         }
 
         // find j1939 transfer protocol message by source address.
@@ -463,7 +484,7 @@ namespace Triumph.J1939
             J1939msg msg = new J1939msg();
             msg.prio = 0x18;
             msg.pgn = 0xEC00;
-            msg.da = (byte)DestAddr;
+            msg.da = (byte)ModuleAddr;
             msg.sa = PC_SA;
             msg.dlc = 8;
             msg.data[0] = 0x11;
@@ -482,7 +503,7 @@ namespace Triumph.J1939
             J1939msg msg = new J1939msg();
             msg.prio = 0x18;
             msg.pgn = 0xEC00;
-            msg.da = (byte)DestAddr;
+            msg.da = (byte)ModuleAddr;
             msg.sa = PC_SA;
             msg.dlc = 8;
             msg.data[0] = 0x13;

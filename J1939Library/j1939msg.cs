@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Triumph.J1939
 {
-    class J1939msg
+    public class J1939msg
     {
         public byte prio = 0;
         public uint pgn = 0;

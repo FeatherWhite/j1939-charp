@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using System.Xml;
-using Peak.Can.Light;
+//using Peak.Can.Light;
 using System.Reflection;
 
 

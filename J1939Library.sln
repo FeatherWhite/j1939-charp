@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Triumph.J1939", "J1939Libra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZLG.CAN", "..\ZLG.CAN\ZLG.CAN\ZLG.CAN.csproj", "{DC91BAF0-711F-4229-87D8-9D98B3A98398}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triumph.J1939Tests", "Triumph.J1939Tests\Triumph.J1939Tests.csproj", "{8EE1574A-3123-4340-8477-FE9B9EE09D29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{DC91BAF0-711F-4229-87D8-9D98B3A98398}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC91BAF0-711F-4229-87D8-9D98B3A98398}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC91BAF0-711F-4229-87D8-9D98B3A98398}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EE1574A-3123-4340-8477-FE9B9EE09D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE1574A-3123-4340-8477-FE9B9EE09D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE1574A-3123-4340-8477-FE9B9EE09D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE1574A-3123-4340-8477-FE9B9EE09D29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
