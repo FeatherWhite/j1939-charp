@@ -33,7 +33,9 @@ namespace Triumph.J1939
         WAITING_CTS = 0, // waiting for CTS
         SENDING_IN_CTS = 1, // sending packages (temporary state)
         SENDING_BM = 2, // sending broadcast packages
-        FINISHED = 3 // finished, remove buffer
+        WAITING_ACK = 3, // waiting for EOM_ACK
+        FINISHED = 4, // finished, remove buffer
+        TIMEOUT = 5 // finished, remove buffer
     }
 
     public enum RecvBufferState : byte
@@ -41,7 +43,8 @@ namespace Triumph.J1939
         WAITING_RTS = 0, // waiting for CTS
         RECVING_IN_RTS = 1, // recving packages (temporary state)
         RECVING_BM = 2,
-        FINISHED = 3 // finished, remove buffer
+        FINISHED = 3, // finished, remove buffer
+        TIMEOUT = 4 // finished, remove buffer
     }
 
     public class J1939_21
@@ -203,6 +206,7 @@ namespace Triumph.J1939
                             LoggerInfo($"Deadline WAITING_CTS reached for snd_buffer src 0x{buf.Value.sa.ToString("X")} " +
                                 $"dst 0x{buf.Value.da.ToString("X")}");
                             SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
+                            link.SendStatus = SendBufferState.TIMEOUT;
                             SendBuffer.Remove(buf.Key);
                         }
                         else if (buf.Value.state == SendBufferState.SENDING_IN_CTS)
@@ -236,7 +240,7 @@ namespace Triumph.J1939
                                 if (buf.Value.nextWaitOnCts == package)
                                 {
                                     buf.Value.state = SendBufferState.WAITING_CTS;
-                                    link.SendStatus = SendBufferState.WAITING_CTS;
+                                    link.SendStatus = SendBufferState.WAITING_ACK;                                   
                                     buf.Value.deadline = GetTimestamp() + T3;
                                     shouldBreak = true;
                                 }
