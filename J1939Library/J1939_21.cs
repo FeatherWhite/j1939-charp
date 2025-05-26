@@ -174,16 +174,17 @@ namespace Triumph.J1939
                             nextWakeup = buf.Value.deadline;
                         }
                     }
-                }
-                else
-                {
-                    LoggerInfo($"Deadline reached for rcv_buffer src 0x{buf.Value.sa.ToString("X")} " +
-                        $"dst 0x{buf.Value.da.ToString("X")}");
-                    if (buf.Value.da != ParameterGroupNumber.GLOBAL)
+                    else
                     {
-                        SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
+                        LoggerInfo($"Deadline reached for rcv_buffer src 0x{buf.Value.sa.ToString("X")} " +
+                            $"dst 0x{buf.Value.da.ToString("X")}");
+                        if (buf.Value.da != ParameterGroupNumber.GLOBAL)
+                        {
+                            SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
+                        }
+                        link.RecvStatus = RecvBufferState.TIMEOUT;
+                        ReceiveBuffer.Remove(buf.Key);
                     }
-                    ReceiveBuffer.Remove(buf.Key);
                 }
             }
 
@@ -450,7 +451,7 @@ namespace Triumph.J1939
                     maxCmdtPackages = MaxCmdtPackets,
                     numPackagesMaxRec = Math.Min(MaxCmdtPackets, maxNumPackages),
                     //data = default,
-                    deadline = T2,
+                    deadline = GetTimestamp() + T2,
                     sa = sa,
                     da = da
                 };
@@ -600,7 +601,7 @@ namespace Triumph.J1939
         {
             return (ushort)(((sa & 0xFF) << 8) | (da & 0xFF));
         }
-
+        uint firstRecvNothingTimestamp = 0;
         public void Notify(uint canId, byte[] data, uint timestamp)
         {
             MessageId mid = new MessageId();
@@ -637,10 +638,24 @@ namespace Triumph.J1939
             {
                 ProcessTPDT(mid, da, data, timestamp);
             }
+            else if(data.Count() == 0)
+            {
+                if (firstRecvNothingTimestamp == 0)
+                {
+                    firstRecvNothingTimestamp = GetTimestamp();
+                }
+                if(GetTimestamp() - firstRecvNothingTimestamp > 1000)
+                {
+                    firstRecvNothingTimestamp = 0;
+                    link.RecvStatus = RecvBufferState.TIMEOUT;
+                }
+                return;
+            }
             else
             {
                 NotifySubscribers(mid.Priority, pgnValue, mid.SourceAddress, da, timestamp, data);
             }
+            firstRecvNothingTimestamp = 0;
         }
 
         public uint GetTimestamp()
