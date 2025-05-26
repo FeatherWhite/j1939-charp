@@ -17,22 +17,27 @@ namespace Triumph.J1939
         private J1939_21 j1939_21;
         public MessageListener Listener { get; set; }
         private uint[] canIds;
-        public J1939_21UsbCanII(USBCanIICommunication can)
+        public J1939_21UsbCanII(USBCanIICommunication can, byte SourceAddress, byte DestAddress)
         {
             this.can = can;
             j1939_21 = new J1939_21();
             j1939_21.SendCan += can.Send;
             j1939_21.link = link;
+            j1939_21.LoggerInfo += LoggerInfo;
+            this.SourceAddress = SourceAddress;
+            this.DestAddress = DestAddress;
             canIds = [new MessageId(7, new ParameterGroupNumber(0, 0xEC, SourceAddress).Value, DestAddress).CanId,
                 new MessageId(7, new ParameterGroupNumber(0, 0xEB, SourceAddress).Value, DestAddress).CanId];
             //j1939_21.LoggerInfo += 
         }
-        public J1939_21UsbCanII()
+        public J1939_21UsbCanII(byte SourceAddress,byte DestAddress)
         {
             j1939_21 = new J1939_21();
             j1939_21.SendCan += SendCan;
             j1939_21.link = link;
             j1939_21.LoggerInfo += LoggerInfo;
+            this.SourceAddress = SourceAddress;
+            this.DestAddress = DestAddress;
             canIds = [new MessageId(7, new ParameterGroupNumber(0, 0xEC, SourceAddress).Value, DestAddress).CanId,
                 new MessageId(7, new ParameterGroupNumber(0, 0xEB, SourceAddress).Value, DestAddress).CanId];
         }
@@ -41,7 +46,7 @@ namespace Triumph.J1939
             Console.WriteLine(message);
         }
         ZCAN_Receive_Data[] query;
-
+        //如果两个消息ID都收到数据，则此方法不适用
         private bool Receive(uint channel, uint[] canIds)
         {
             bool ret = false;
@@ -51,11 +56,12 @@ namespace Triumph.J1939
                 var query = Get(canId, gets);
                 if (query.Count() <= 0)
                 {
-                    ret = false;
+                    ret |= false;
                 }
                 else
                 {
-                    ret = true;
+                    this.query = query;
+                    ret |= true;
                 }
             }
             return ret;
@@ -63,25 +69,52 @@ namespace Triumph.J1939
 
         public void Receive()
         {
-
-        }
-
-        public void Poll()
-        {
             if (Receive(j1939_21.Channel, canIds))
-            {
+            {               
                 foreach (var q in query)
                 {
-                    Notify(q.frame.can_id, q.frame.data, (uint)q.timestamp);
-                    JobThread();
+                    Notify(q.frame.can_id, q.frame.data, j1939_21.GetTimestamp());
                 }
             }
             else
             {
-                JobThread();
+                Notify(0, new byte[0], j1939_21.GetTimestamp());
             }
         }
 
+        public J1939TpStatus Job()
+        {
+            J1939TpStatus status = new J1939TpStatus();
+            JobThread();
+            if (link.SendStatus == SendBufferState.SENDING_IN_CTS)
+            {
+                status = J1939TpStatus.SendInProgress;
+            }
+            if(link.SendStatus == SendBufferState.FINISHED ||
+                link.SendStatus == SendBufferState.WAITING_ACK)
+            {
+                status = J1939TpStatus.SendTpDataFinished;
+            }
+            if(link.RecvStatus == RecvBufferState.FINISHED)
+            {
+                status = J1939TpStatus.RecvFinished;
+            }
+            if(link.SendStatus == SendBufferState.TIMEOUT)
+            {
+                status = J1939TpStatus.SendTimeout;
+            }
+            if (link.RecvStatus == RecvBufferState.TIMEOUT)
+            {
+                status = J1939TpStatus.RecvTimeout;
+            }
+            return status;
+        }
+        public byte[] GetRevcData()
+        {
+            byte[] RevcData = new byte[link.RecvBufSize];
+            Array.Copy(link.RecvBuf, RevcData, link.RecvBufSize);
+            return RevcData;
+        }
         private ZCAN_Receive_Data[] Get(uint id, ZCAN_Receive_Data[] array)
         {
             ZCAN_Receive_Data[] ret = new ZCAN_Receive_Data[0];
@@ -97,7 +130,7 @@ namespace Triumph.J1939
                     {
                         ret[index].frame.can_id = GetId(q.frame.can_id);
                         Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} " +
-                            $"{can.CanPara.deviceIndex} CanId:0x{q.frame.can_id.ToString("X")},通道:{link.Channel} 接收:{BitConverter.ToString(q.frame.data)}");
+                            $"{can.CanPara.deviceInfoIndex} CanId:0x{GetId(q.frame.can_id).ToString("X")},通道:{link.Channel} 接收:{BitConverter.ToString(q.frame.data)}");
                         index++;
                     }
                 }
@@ -165,5 +198,16 @@ namespace Triumph.J1939
         public uint RecvCanId { get; set; }
         public ushort RecvBufSize { get; set; }
         public RecvBufferState RecvStatus { get; set; }
+    }
+
+    public enum J1939TpStatus : int
+    {
+        Idle = 0x0000,
+        SendInProgress = 0x0001,
+        RecvFinished = 0x0002,
+        SendTpDataFinished = 0x0003,
+        Error = 0x0004,
+        SendTimeout = 0x0005,
+        RecvTimeout = 0x0006,
     }
 }
