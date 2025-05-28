@@ -3,8 +3,9 @@
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.1;netstandard2.0;net48;net472</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
 	  <LangVersion>12</LangVersion>
+	  <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
