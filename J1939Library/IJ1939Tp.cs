@@ -11,5 +11,7 @@ namespace Triumph.J1939
             byte priority, byte[] data);
         public void Receive();
         public byte[] GetRevcData();
+        //public byte[] Receive(uint channel, uint receiveCanId);
+        //public bool Send(uint id, uint channel, byte[] data);
     }
 }
