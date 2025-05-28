@@ -81,6 +81,19 @@ namespace Triumph.J1939
                 Notify(0, new byte[0], j1939_21.GetTimestamp());
             }
         }
+        /// <summary>
+        /// 接收普通CAN消息
+        /// </summary>
+        /// <param name="data"></param>
+        //public byte[] Receive(uint channel, uint receiveCanId)
+        //{
+        //    var ret = can.Receive(channel, receiveCanId);
+        //    return ret.frame.data;
+        //}
+        //public bool Send(uint id,uint channel, byte[] data)
+        //{
+        //    return can.Send(id, channel, data);
+        //}
 
         public J1939TpStatus Job()
         {
