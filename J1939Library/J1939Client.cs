@@ -95,6 +95,28 @@ namespace Triumph.J1939
                     break;
             }
         }
+        ///// <summary>
+        ///// 发送普通CAN消息
+        ///// </summary>
+        ///// <param name="id">发送CanId</param>
+        ///// <param name="channel">Can通道索引</param>
+        ///// <param name="data">发送的数据</param>
+        //public void Send(uint id, uint channel, byte[] data)
+        //{
+        //    tp.Send(id, channel, data);
+        //}
+        ///// <summary>
+        ///// 接收普通CAN消息
+        ///// </summary>
+        ///// <param name="channel">Can通道索引</param>
+        ///// <param name="receiveCanId">接收CanId</param>
+        ///// <returns></returns>
+        //public byte[] Receive(uint channel, uint receiveCanId)
+        //{
+        //    return tp.Receive(channel, receiveCanId);
+        //}
+
+
         private void ChanageState(int state)
         {
             if(this.state != state)
