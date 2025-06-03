@@ -55,7 +55,7 @@ namespace Triumph.J1939
 
         public SendCanFunc SendCan;
         public NotifySubscribersFunc NotifySubscribers;
-        public LoggerInfoFunc LoggerInfo;
+        public LoggerInfoFunc LogInfo;
 
         public const int MAX_TP_DT = 1785;
         public uint Channel { get; set; }
@@ -176,8 +176,11 @@ namespace Triumph.J1939
                     }
                     else
                     {
-                        LoggerInfo($"Deadline reached for rcv_buffer src 0x{buf.Value.sa.ToString("X")} " +
+                        if(LogInfo != null)
+                        {
+                            LogInfo($"Deadline reached for rcv_buffer src 0x{buf.Value.sa.ToString("X")} " +
                             $"dst 0x{buf.Value.da.ToString("X")}");
+                        }                        
                         if (buf.Value.da != ParameterGroupNumber.GLOBAL)
                         {
                             SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
@@ -204,8 +207,12 @@ namespace Triumph.J1939
                     {
                         if (buf.Value.state == SendBufferState.WAITING_CTS)
                         {
-                            LoggerInfo($"Deadline WAITING_CTS reached for snd_buffer src 0x{buf.Value.sa.ToString("X")} " +
-                                $"dst 0x{buf.Value.da.ToString("X")}");
+                            if (LogInfo != null)
+                            {
+                                LogInfo($"Deadline WAITING_CTS reached for snd_buffer src 0x{buf.Value.sa.ToString("X")} " +
+                                    $"dst 0x{buf.Value.da.ToString("X")}");
+                            }
+                            
                             SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
                             link.SendStatus = SendBufferState.TIMEOUT;
                             SendBuffer.Remove(buf.Key);
@@ -303,7 +310,10 @@ namespace Triumph.J1939
                         }
                         else
                         {
-                            LoggerInfo("Unknown SendBufferState: " + buf.Value.state);
+                            if(LogInfo != null)
+                            {
+                                LogInfo("Unknown SendBufferState: " + buf.Value.state);
+                            }
                             SendBuffer.Remove(buf.Key);
                         }
                     }
@@ -479,13 +489,19 @@ namespace Triumph.J1939
                 byte numPackagesAll = SendBuffer[bufferHash].numPackages;
                 if (numPackages > numPackagesAll)
                 {
-                    LoggerInfo($"CTS: Allowed more packets {numPackages} than complete transmission {numPackagesAll}");
-                    numPackages = numPackagesAll;
+                    if(LogInfo != null)
+                    {
+                        LogInfo($"CTS: Allowed more packets {numPackages} than complete transmission {numPackagesAll}");
+                        numPackages = numPackagesAll;
+                    }
                 }
                 if (nextPackageNumber + numPackages > numPackagesAll)
                 {
-                    LoggerInfo($"CTS: Allowed more packets {numPackages} " +
+                    if( LogInfo != null)
+                    {
+                        LogInfo($"CTS: Allowed more packets {numPackages} " +
                         $"than needed to complete transmission {numPackagesAll - nextPackageNumber}");
+                    }
                     numPackages = Convert.ToByte(numPackagesAll - nextPackageNumber);
                 }
                 //此处类型待定
@@ -546,7 +562,11 @@ namespace Triumph.J1939
             }
             else
             {
-                LoggerInfo($"Received TP.CM with unknown control_byte {controlByte}");
+                if (LogInfo != null)
+                {
+                    LogInfo($"Received TP.CM with unknown control_byte {controlByte}");
+
+                }
             }
         }
 
@@ -563,8 +583,12 @@ namespace Triumph.J1939
             if ((sequenceNumber * 7) >= ReceiveBuffer[bufferHash].messageSize)
             {
                 ushort messageSize = ReceiveBuffer[bufferHash].messageSize;
-                LoggerInfo($"finished RCV of PGN {ReceiveBuffer[bufferHash].pgn} " +
+                if (LogInfo != null)
+                {
+                    LogInfo($"finished RCV of PGN {ReceiveBuffer[bufferHash].pgn} " +
                     $"with size {ReceiveBuffer[bufferHash].messageSize}");
+                }
+                
                 Array.Copy(ReceiveBuffer[bufferHash].data, ReceiveBuffer[bufferHash].data, messageSize);
                 if (da != ParameterGroupNumber.GLOBAL)
                 {

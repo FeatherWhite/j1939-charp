@@ -9,6 +9,8 @@ namespace Triumph.J1939
 {
     public class J1939_21UsbCanII : IJ1939Tp
     {
+        public delegate void LoggerInfoFunc(string message);
+        public LoggerInfoFunc LogInfo;
         public J1939TpLink link { get; set; } = new J1939TpLink();
         public byte MaxCmdtPackets { get; set; }
         public byte SourceAddress { get; set; }
@@ -23,7 +25,7 @@ namespace Triumph.J1939
             j1939_21 = new J1939_21();
             j1939_21.SendCan += can.Send;
             j1939_21.link = link;
-            j1939_21.LoggerInfo += LoggerInfo;
+            j1939_21.LogInfo += WriteLine;
             this.SourceAddress = SourceAddress;
             this.DestAddress = DestAddress;
             canIds = [new MessageId(7, new ParameterGroupNumber(0, 0xEC, SourceAddress).Value, DestAddress).CanId,
@@ -35,13 +37,13 @@ namespace Triumph.J1939
             j1939_21 = new J1939_21();
             j1939_21.SendCan += SendCan;
             j1939_21.link = link;
-            j1939_21.LoggerInfo += LoggerInfo;
+            j1939_21.LogInfo += WriteLine;
             this.SourceAddress = SourceAddress;
             this.DestAddress = DestAddress;
             canIds = [new MessageId(7, new ParameterGroupNumber(0, 0xEC, SourceAddress).Value, DestAddress).CanId,
                 new MessageId(7, new ParameterGroupNumber(0, 0xEB, SourceAddress).Value, DestAddress).CanId];
         }
-        public void LoggerInfo(string message)
+        public void WriteLine(string message)
         {
             Console.WriteLine(message);
         }
@@ -144,6 +146,11 @@ namespace Triumph.J1939
                         ret[index].frame.can_id = GetId(q.frame.can_id);
                         Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} " +
                             $"{can.CanPara.deviceInfoIndex} CanId:0x{GetId(q.frame.can_id).ToString("X")},通道:{link.Channel} 接收:{BitConverter.ToString(q.frame.data)}");
+                        if(LogInfo != null)
+                        {
+                            LogInfo($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} " +
+                            $"{can.CanPara.deviceInfoIndex} CanId:0x{GetId(q.frame.can_id).ToString("X")},通道:{link.Channel} 接收:{BitConverter.ToString(q.frame.data)}");
+                        }                    
                         index++;
                     }
                 }
