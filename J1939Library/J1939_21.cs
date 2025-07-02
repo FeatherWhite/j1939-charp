@@ -475,6 +475,10 @@ namespace Triumph.J1939
                 byte numPackages = data[1];
                 byte nextPackageNumber = (byte)(data[2] - 1);
                 ushort bufferHash = BufferHash(da, sa);
+                if(nextPackageNumber > numPackages)
+                {
+                    return;
+                }
                 if (!SendBuffer.ContainsKey(bufferHash))
                 {
                     SendTPAbort(da, sa, (byte)ConnectionAbortReason.RESOURCES, pgn);
