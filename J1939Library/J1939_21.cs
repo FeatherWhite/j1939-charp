@@ -159,7 +159,8 @@ namespace Triumph.J1939
             return true;
         }
 
-        public uint JobThread(uint now)
+        public uint 
+            JobThread(uint now)
         {
             uint nextWakeup = now + 5;
             for (int i = 0; i < ReceiveBuffer.Count; i++ )
@@ -248,7 +249,7 @@ namespace Triumph.J1939
                                 if (buf.Value.nextWaitOnCts == package)
                                 {
                                     buf.Value.state = SendBufferState.WAITING_CTS;
-                                    link.SendStatus = SendBufferState.WAITING_ACK;                                   
+                                    link.SendStatus = SendBufferState.WAITING_CTS;                                   
                                     buf.Value.deadline = GetTimestamp() + T3;
                                     shouldBreak = true;
                                 }
@@ -475,10 +476,7 @@ namespace Triumph.J1939
                 byte numPackages = data[1];
                 byte nextPackageNumber = (byte)(data[2] - 1);
                 ushort bufferHash = BufferHash(da, sa);
-                if(nextPackageNumber > numPackages)
-                {
-                    return;
-                }
+                
                 if (!SendBuffer.ContainsKey(bufferHash))
                 {
                     SendTPAbort(da, sa, (byte)ConnectionAbortReason.RESOURCES, pgn);
