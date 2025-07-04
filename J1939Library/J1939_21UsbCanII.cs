@@ -122,6 +122,10 @@ namespace Triumph.J1939
             {
                 status = J1939TpStatus.RecvTimeout;
             }
+            if(link.SendStatus == SendBufferState.WAITING_CTS)
+            {
+                status = J1939TpStatus.SendingAwaitCTS;
+            }
             return status;
         }
         public byte[] GetRevcData()
@@ -229,5 +233,6 @@ namespace Triumph.J1939
         Error = 0x0004,
         SendTimeout = 0x0005,
         RecvTimeout = 0x0006,
+        SendingAwaitCTS = 0x0007
     }
 }
