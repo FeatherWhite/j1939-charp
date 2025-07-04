@@ -57,6 +57,10 @@ namespace Triumph.J1939
                     {
                         ChanageState(SendingAwaitACK);
                     }
+                    if(sendStatus == J1939TpStatus.SendingAwaitCTS)
+                    {
+                        ChanageState(SendingAwaitCTS);
+                    }
                     if (sendStatus == J1939TpStatus.SendTimeout)
                     {
                         ChanageState(Idle);
