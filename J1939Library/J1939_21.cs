@@ -510,6 +510,7 @@ namespace Triumph.J1939
                 SendBuffer[bufferHash].nextWaitOnCts =
                     Convert.ToUInt32(SendBuffer[bufferHash].nextPacketToSend + numPackages - 1);
                 SendBuffer[bufferHash].state = SendBufferState.SENDING_IN_CTS;
+                link.SendStatus = SendBufferState.SENDING_IN_CTS;
                 SendBuffer[bufferHash].deadline = GetTimestamp();
                 //工作线程启动
             }
@@ -670,7 +671,7 @@ namespace Triumph.J1939
                 {
                     firstRecvNothingTimestamp = GetTimestamp();
                 }
-                if(GetTimestamp() - firstRecvNothingTimestamp > 1000)
+                if(GetTimestamp() - firstRecvNothingTimestamp > 1500)
                 {
                     firstRecvNothingTimestamp = 0;
                     link.RecvStatus = RecvBufferState.TIMEOUT;
