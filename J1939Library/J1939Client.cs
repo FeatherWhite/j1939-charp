@@ -43,7 +43,7 @@ namespace Triumph.J1939
         public void Poll()
         {
             switch (state)
-            {
+            {             
                 case Idle:
                     break;
                 case SendingAwaitCTS:
@@ -86,7 +86,7 @@ namespace Triumph.J1939
                 case RecvingTPDT:
                     tp.Receive();
                     J1939TpStatus recvStatus3 = tp.Job();
-                    if(recvStatus3 == J1939TpStatus.RecvFinished)
+                    if(recvStatus3 == J1939TpStatus.RecvFinished )
                     {
                         ChanageState(Idle);
                         RecvBuffer = tp.GetRevcData();
@@ -97,6 +97,7 @@ namespace Triumph.J1939
                     }
                     //Console.WriteLine("RecvingTPDT");
                     break;
+   
             }
         }
         ///// <summary>
