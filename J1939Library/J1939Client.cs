@@ -21,6 +21,11 @@ namespace Triumph.J1939
         public int state { get; set; }
 
         public IJ1939Tp tp { get; set; }
+        public uint Channel
+        {
+            get { return tp.Channel; }
+            set {tp.Channel = value; }
+        }
         public J1939Client()
         {
             RecvBuffer = new byte[0];
