@@ -15,6 +15,17 @@ namespace Triumph.J1939
         public byte MaxCmdtPackets { get; set; }
         public byte SourceAddress { get; set; }
         public byte DestAddress { get; set; }
+        public uint Channel
+        {
+            get
+            {
+                return j1939_21.Channel;
+            }
+            set
+            {
+                j1939_21.Channel = value;
+            }
+        }
         private USBCanIICommunication can;
         private J1939_21 j1939_21;
         public MessageListener Listener { get; set; }
