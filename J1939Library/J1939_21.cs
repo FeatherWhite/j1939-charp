@@ -35,7 +35,8 @@ namespace Triumph.J1939
         SENDING_BM = 2, // sending broadcast packages
         WAITING_ACK = 3, // waiting for EOM_ACK
         FINISHED = 4, // finished, remove buffer
-        TIMEOUT = 5 // finished, remove buffer
+        TIMEOUT = 5, // finished, remove buffer
+        NoSet = 6
     }
 
     public enum RecvBufferState : byte
@@ -44,7 +45,8 @@ namespace Triumph.J1939
         RECVING_IN_RTS = 1, // recving packages (temporary state)
         RECVING_BM = 2,
         FINISHED = 3, // finished, remove buffer
-        TIMEOUT = 4 // finished, remove buffer
+        TIMEOUT = 4, // finished, remove buffer
+        NoSet = 5
     }
 
     public class J1939_21
@@ -159,8 +161,7 @@ namespace Triumph.J1939
             return true;
         }
 
-        public uint 
-            JobThread(uint now)
+        public uint JobThread(uint now)
         {
             uint nextWakeup = now + 5;
             for (int i = 0; i < ReceiveBuffer.Count; i++ )
@@ -187,6 +188,7 @@ namespace Triumph.J1939
                             SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
                         }
                         link.RecvStatus = RecvBufferState.TIMEOUT;
+                        link.SendStatus = SendBufferState.NoSet;
                         ReceiveBuffer.Remove(buf.Key);
                     }
                 }
@@ -216,6 +218,7 @@ namespace Triumph.J1939
                             
                             SendTPAbort(buf.Value.sa, buf.Value.da, (byte)ConnectionAbortReason.TIMEOUT, buf.Value.pgn);
                             link.SendStatus = SendBufferState.TIMEOUT;
+                            link.RecvStatus = RecvBufferState.NoSet;
                             SendBuffer.Remove(buf.Key);
                         }
                         else if (buf.Value.state == SendBufferState.SENDING_IN_CTS)
@@ -248,9 +251,10 @@ namespace Triumph.J1939
                                 bool shouldBreak = false;
                                 if (buf.Value.nextWaitOnCts == package)
                                 {
-                                    buf.Value.state = SendBufferState.WAITING_CTS;
-                                    link.SendStatus = SendBufferState.WAITING_CTS;                                   
+                                    buf.Value.state = SendBufferState.WAITING_CTS;                                                          
                                     buf.Value.deadline = GetTimestamp() + T3;
+                                    link.SendStatus = SendBufferState.WAITING_CTS;
+                                    link.RecvStatus = RecvBufferState.NoSet;
                                     shouldBreak = true;
                                 }
                                 else if (MinimumTpRtsCtsDtInterval > 0)
@@ -467,6 +471,7 @@ namespace Triumph.J1939
                     da = da
                 };
                 link.RecvStatus = RecvBufferState.RECVING_IN_RTS;
+                link.SendStatus = SendBufferState.NoSet;
                 SendTPCTS(da, sa, ReceiveBuffer[bufferHash].numPackagesMaxRec, 1, pgn);
                 //工作线程启动
             }
@@ -511,6 +516,7 @@ namespace Triumph.J1939
                     Convert.ToUInt32(SendBuffer[bufferHash].nextPacketToSend + numPackages - 1);
                 SendBuffer[bufferHash].state = SendBufferState.SENDING_IN_CTS;
                 link.SendStatus = SendBufferState.SENDING_IN_CTS;
+                link.RecvStatus = RecvBufferState.NoSet;
                 SendBuffer[bufferHash].deadline = GetTimestamp();
                 //工作线程启动
             }
@@ -525,6 +531,7 @@ namespace Triumph.J1939
                 //NotifySubscribers(mid.Priority, pgn, mid.SourceAddress, da, timestamp, data);
                 SendBuffer[bufferHash].state = SendBufferState.FINISHED;
                 link.SendStatus = SendBufferState.FINISHED;
+                link.RecvStatus = RecvBufferState.NoSet;
                 SendBuffer[bufferHash].deadline = GetTimestamp();
                 //工作线程启动
             }
@@ -550,6 +557,7 @@ namespace Triumph.J1939
                     da = da
                 };
                 link.RecvStatus = RecvBufferState.RECVING_BM;
+                link.SendStatus = SendBufferState.NoSet;
                 //工作线程启动
             }
             else if (controlByte == (byte)ConnectionMode.ABORT)
@@ -558,9 +566,10 @@ namespace Triumph.J1939
                 if (SendBuffer.ContainsKey(bufferHash)
                     && SendBuffer[bufferHash].state == SendBufferState.WAITING_CTS)
                 {
-                    link.SendStatus = SendBufferState.FINISHED;
                     SendBuffer[bufferHash].state = SendBufferState.FINISHED;
-                    SendBuffer[bufferHash].deadline = GetTimestamp();
+                    SendBuffer[bufferHash].deadline = GetTimestamp();                    
+                    link.SendStatus = SendBufferState.FINISHED;
+                    link.RecvStatus = RecvBufferState.NoSet;
                 }
             }
             else
@@ -600,6 +609,7 @@ namespace Triumph.J1939
                     link.RecvBuf = ReceiveBuffer[bufferHash].data;
                     link.RecvBufSize = messageSize;
                     link.RecvStatus = RecvBufferState.FINISHED;
+                    link.SendStatus = SendBufferState.NoSet;
                     //NotifySubscribers(mid.Priority, ReceiveBuffer[bufferHash].pgn, sa, da, timestamp, ReceiveBuffer[bufferHash].data);
                     ReceiveBuffer.Remove(bufferHash);
                     //工作线程启动
@@ -675,6 +685,7 @@ namespace Triumph.J1939
                 {
                     firstRecvNothingTimestamp = 0;
                     link.RecvStatus = RecvBufferState.TIMEOUT;
+                    link.SendStatus = SendBufferState.NoSet;
                 }
                 return;
             }
