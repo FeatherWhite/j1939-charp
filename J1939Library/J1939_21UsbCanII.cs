@@ -133,13 +133,14 @@ namespace Triumph.J1939
             {
                 status = J1939TpStatus.RecvTimeout;
             }
-            if(link.RecvStatus != RecvBufferState.FINISHED 
-                && link.SendStatus == SendBufferState.WAITING_CTS)
+            if(link.SendStatus == SendBufferState.WAITING_CTS)
             {
                 status = J1939TpStatus.SendingAwaitCTS;
             }
             return status;
         }
+
+
         public byte[] GetRevcData()
         {
             byte[] RevcData = new byte[link.RecvBufSize];
